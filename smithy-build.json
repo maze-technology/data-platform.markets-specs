@@ -17,7 +17,7 @@
       },
       {
         "url": "https://scm.maze.trading/api/v4/groups/67/-/packages/maven",
-        "httpCredentials": "${GITLAB_MAVEN_USER}:${GITLAB_MAVEN_PASSWORD}"
+        "httpCredentials": "${SMITHY_MAVEN_USER}:${SMITHY_MAVEN_PASSWORD}"
       },
       {
         "url": "https://repo.maven.apache.org/maven2/"
