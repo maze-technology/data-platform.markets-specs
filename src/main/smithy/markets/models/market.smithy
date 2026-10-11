@@ -28,6 +28,9 @@ structure Market {
     @required
     quoteId: Document
 
+    /// Custom properties for a specific market type (e.g. options).
+    specificData: Document
+
     @required
     dataProvidersMetaDatas: MarketDataProvidersMetaDatasList
 
