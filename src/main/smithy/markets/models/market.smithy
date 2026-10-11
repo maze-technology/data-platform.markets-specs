@@ -28,6 +28,11 @@ structure Market {
     @required
     quoteId: Document
 
+    /// Polymorphic market-type payload (spot/perp/future/option) as JSON.
+    /// Mirrors the jsonb `specific_data` column; short Jackson keys are used
+    /// in persistence (`m`, `s`, `e`, `t`, `o`, `u`).
+    specificData: Document
+
     @required
     dataProvidersMetaDatas: MarketDataProvidersMetaDatasList
 
