@@ -2,7 +2,6 @@
 
 This repository contains the Hello World specifications and generates the corresponding DTOs libraries
 
-
 ## Quality
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=maze-technology_hello-world-specs-template&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=maze-technology_hello-world-specs-template)
