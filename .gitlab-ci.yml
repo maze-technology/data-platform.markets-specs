@@ -7,7 +7,7 @@
 # Note: CI_JOB_TOKEN inbound allowlists may be required for cross-project reads with job tokens;
 # group CI vars GITLAB_MAVEN_* (Deploy Token) are the preferred read path for consumers/templates.
 
-stages: [test, publish]
+stages: [validate, test, publish]
 
 include:
   - project: "data-platform/infrastructure-base"
