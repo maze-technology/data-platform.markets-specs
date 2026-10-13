@@ -8,11 +8,11 @@ use tech.maze.dtos.markets.models#MarketMetaDatas
 use tech.maze.events#event
 
 @protoEnabled
-@event(type: "tech.maze.markets.fetch.request", topic: "markets.fetch.request", version: "1.0.0")
+@event(type: "tech.maze.markets.fetch.request")
 structure FetchMarketsRequest {}
 
 @protoEnabled
-@event(type: "tech.maze.markets.fetch.response", topic: "markets.fetch.response", version: "1.0.0")
+@event(type: "tech.maze.markets.fetch.response")
 structure FetchMarketsResponse {
     @required
     sourceRequest: FetchMarketsRequest
