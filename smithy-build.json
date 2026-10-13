@@ -8,7 +8,7 @@
       "com.disneystreaming.alloy:alloy-core:0.3.36",
       "tech.maze:commons:0.0.19",
       "tech.maze:smithy-event-codegen:0.0.2",
-      "tech.maze:smithy-event-traits:0.0.2"
+      "tech.maze:smithy-event-traits:0.0.5"
     ],
     "repositories": [
       {
