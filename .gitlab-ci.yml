@@ -11,31 +11,31 @@ stages: [validate, test, publish]
 
 include:
   - project: "iac/infrastructure-base"
-    ref: "v0.2.27"
+    ref: "v0.2.33"
     file: "/ci/templates/workflow-auto-cancel.gitlab-ci.yml"
   - project: "iac/infrastructure-base"
-    ref: "v0.2.27"
+    ref: "v0.2.33"
     file: "/ci/templates/java-build.gitlab-ci.yml"
     inputs:
       job_image: eclipse-temurin:21-jdk
       build_script: "make build"
       install_smithy_tools: "true"
   - project: "iac/infrastructure-base"
-    ref: "v0.2.27"
+    ref: "v0.2.33"
     file: "/ci/templates/smithy-fmt.gitlab-ci.yml"
   - project: "iac/infrastructure-base"
-    ref: "v0.2.27"
+    ref: "v0.2.33"
     file: "/ci/templates/tag-release.gitlab-ci.yml"
   - project: "iac/infrastructure-base"
-    ref: "v0.2.27"
+    ref: "v0.2.33"
     file: "/ci/templates/release-approval.gitlab-ci.yml"
   - project: "iac/infrastructure-base"
-    ref: "v0.2.27"
+    ref: "v0.2.33"
     file: "/ci/templates/maven-publish.gitlab-ci.yml"
     inputs:
       job_image: eclipse-temurin:21-jdk
   - project: "iac/infrastructure-base"
-    ref: "v0.2.27"
+    ref: "v0.2.33"
     file: "/ci/templates/cargo-publish.gitlab-ci.yml"
     inputs:
       crate_dir: build/generated/rust
