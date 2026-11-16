@@ -27,8 +27,9 @@ if [ -n "${CI_COMMIT_TAG:-}" ]; then
 fi
 
 # Prost files are named like tech.maze.dtos.helloworld.models.rs and expect
-# sibling modules (super::models). Tonic stubs (*tonic.rs) are include!()'d
-# from the companion prost file — do not register them as modules.
+# sibling modules (super::models) and shared parents (super::super::commons::…).
+# Tonic stubs (*tonic.rs) are include!()'d from the companion prost file — do
+# not register them as modules.
 mapfile -t files < <(
   find "${SRC_RS}" -type f -name '*.rs' ! -name 'lib.rs' ! -name '*tonic.rs' | sort
 )
@@ -47,29 +48,57 @@ fi
     echo "pub const CRATE_NAME: &str = \"${CRATE_NAME}\";"
     echo "pub const CRATE_VERSION: &str = env!(\"CARGO_PKG_VERSION\");"
   else
-    # Flat crate-root modules so cargo package verification works (empty nested
-    # dirs are omitted from the publish tarball and break #[path = "../…"]).
-    # Do not name the assoc array GROUPS — bash reserves that name.
-    declare -A MOD_GROUPS=()
+    # Nest modules to match protobuf package paths so prost `super::` / `super::super::`
+    # refs resolve (e.g. markets.requests → commons.search). Keep .rs files flat under
+    # src/ and include!() them — cargo package omits empty nested dirs, which broke
+    # the earlier #[path = "../…"] layout (see f67702f). Flattening by leaf name also
+    # collided when commons.search and markets.search both became `pub mod search`.
+    rels=()
     for f in "${files[@]}"; do
-      rel="${f#${SRC_RS}/}"
-      base="${rel%.rs}"
-      leaf="${base##*.}"
-      prefix="${base%.*}"
-      MOD_GROUPS["${prefix}"]="${MOD_GROUPS[${prefix}]:-}${leaf}|"
+      rels+=("${f#${SRC_RS}/}")
     done
+    SRC_RS="${SRC_RS}" python3 - "${rels[@]}" <<'PY'
+import sys
 
-    for prefix in $(printf '%s\n' "${!MOD_GROUPS[@]}" | sort); do
-      IFS='|' read -r -a leaves <<< "${MOD_GROUPS[$prefix]}"
-      for leaf in "${leaves[@]}"; do
-        [ -n "${leaf}" ] || continue
-        rel="${prefix}.${leaf}.rs"
-        echo "#[path = \"${rel}\"]"
-        echo "pub mod ${leaf};"
-        echo "pub use ${leaf}::*;"
-        echo
-      done
-    done
+files = sys.argv[1:]
+tree: dict = {}
+for rel in files:
+    if not rel.endswith(".rs"):
+        raise SystemExit(f"expected .rs file, got {rel!r}")
+    parts = rel[: -len(".rs")].split(".")
+    if len(parts) < 2:
+        raise SystemExit(f"prost file needs package.path.leaf.rs, got {rel!r}")
+    node = tree
+    for part in parts[:-1]:
+        child = node.get(part)
+        if isinstance(child, str):
+            raise SystemExit(f"path conflict at {part} for {rel}")
+        if child is None:
+            child = {}
+            node[part] = child
+        node = child
+    leaf = parts[-1]
+    if leaf in node and not isinstance(node[leaf], str):
+        raise SystemExit(f"leaf {leaf} conflicts with nested module for {rel}")
+    node[leaf] = rel
+
+
+def emit(node: dict, indent: int = 0) -> None:
+    pad = "  " * indent
+    for key in sorted(node):
+        val = node[key]
+        if isinstance(val, str):
+            print(f"{pad}pub mod {key} {{")
+            print(f'{pad}  include!("{val}");')
+            print(f"{pad}}}")
+        else:
+            print(f"{pad}pub mod {key} {{")
+            emit(val, indent + 1)
+            print(f"{pad}}}")
+
+
+emit(tree)
+PY
   fi
 } > "${SRC_RS}/lib.rs"
 
